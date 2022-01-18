@@ -101,13 +101,31 @@ async def ping(ctx):
   embed = discord.Embed(color=0x00FF00, title="**Pong!**", description=f"{bot.user.name} has been online for {datetime.now()-onlineTime}!")
   await ctx.respond(embed=embed)
 
+@bot.slash_command(description="Show your current job",guild_ids=guild_ids)
+async def job(ctx, user:Option(discord.Member, "The member to view their job", required=False, default=None)):
+  if user == None:
+    user = ctx.author
+  if str(user.id) in db[str(ctx.guild.id)]["users"]:
+    u = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
+    jobTitle = u
+    jobDesc = db[str(ctx.guild.id)]["jobs"][u][0]
+    salary = db[str(ctx.guild.id)]["jobs"][u][1]
+  else:
+    jobTitle = "No Current Job"
+    jobDesc = "No Job Description"
+    salary = "0"
+  embed = discord.Embed(title=f"{jobTitle}", description=f"{jobDesc}", color=0x00FF00)
+  embed.set_author(name=f"{user.display_name}", icon_url=user.display_avatar.url)
+  embed.set_footer(text=f"{salary}💸 / hour")
+  await ctx.respond(embed=embed)
+
 set = SlashCommandGroup("set", "Set user's jobs and incomes", guild_ids=guild_ids)
 
 @set.command(name="job", description="Sets a user's job",guild_ids=guild_ids)
 async def setJob(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
   info = ""
   if job not in db[str(ctx.guild.id)]["jobs"]:
-    db[str(ctx.guild.id)]["jobs"][job] = [job,"No Description Provided",0.0]
+    db[str(ctx.guild.id)]["jobs"][job] = ["No Description Provided",0.0]
     info = "Job automatically created. Use `/edit job` to edit the job's description and salary.\n"
   checkUser(user)
   oldJob = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
@@ -174,7 +192,7 @@ def checkGuild(guild):
 def checkUser(user):
   checkGuild(user.guild)
   if str(user.id) not in db[str(user.guild.id)]["users"]:
-    db[str(user.guild.id)]["users"][str(user.id)] = {"job":"none"}
+    db[str(user.guild.id)]["users"][str(user.id)] = {"job":"none", "bal":0.0}
 
 #simple error message, passes ctx from commands
 async def error(ctx, code):
