@@ -76,6 +76,8 @@ async def help(ctx):
   embed.set_footer(text="_______________________\nMade By Zennara#8377\nSelect an module for extensive help", icon_url=ctx.guild.get_member(bot.user.id).display_avatar.url)
   #reply message
   await ctx.respond(embed=embed, view=helpClass())
+
+  
 #<-----------------------COMMANDS----------------------->
 @bot.slash_command(description="Clear the database",guild_ids=guild_ids)
 async def clear(ctx):
@@ -98,6 +100,19 @@ async def reset(ctx):
 async def ping(ctx):
   embed = discord.Embed(color=0x00FF00, title="**Pong!**", description=f"{bot.user.name} has been online for {datetime.now()-onlineTime}!")
   await ctx.respond(embed=embed)
+
+set = SlashCommandGroup("set", "Set user's jobs and incomes", guild_ids=guild_ids)
+
+@set.command(name="job", description="Sets a user's job",guild_ids=guild_ids)
+async def setJob(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
+  info = ""
+  if job not in db[str(ctx.guild.id)]["jobs"]:
+    db[str(ctx.guild.id)]["jobs"][job] = [job,"No Description Provided",0.0]
+    info = "Job automatically created. Use `/edit job` to edit the job's description and salary.\n"
+  await confirm(ctx, f"{info} {user.mention} was given the job **{job}**", True)
+  
+
+bot.add_application_command(set)
   
 #<-----------------------EVENTS----------------------->
 @bot.event
@@ -137,7 +152,7 @@ async def on_message(message):
 #<-----------------------FUNCTIONS----------------------->
 #used to reset the database for a guild
 def resetDB(guild):
-  db[str(guild.id)] = {"mod":0} #this is where you set up your db format
+  db[str(guild.id)] = {"mod":0, "channel":0, "jobs":{}, "users":{}} #this is where you set up your db format
 
 #check if a guild is in the db
 def checkGuild(guild):

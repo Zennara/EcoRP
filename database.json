@@ -1,1 +1,1 @@
-"{'806706495466766366': ObservedDict(value={'mod': 0})}"
+"{'806706495466766366': ObservedDict(value={'mod': 0, 'channel': 0, 'jobs': ObservedDict(value={'3.2': ObservedList(value=[3.2, 'No Description Provided']), 'test': ObservedList(value=['test', 'No Description Provided', 0.0])}), 'users': ObservedDict(value={})})}"
