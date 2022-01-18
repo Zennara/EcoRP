@@ -12,7 +12,7 @@ from discord.commands import SlashCommandGroup, Option, permissions #slash comma
 from datetime import datetime, timedelta #time and ping command
 import math #for math
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 bot = discord.Bot(intents=intents)
 
 guild_ids = [806706495466766366] #enter your guild ID's here for instant use instead of waiting for global slash registration
@@ -24,8 +24,76 @@ try:
 except:
   print("No rate limit")
 
+#<-----------------------HELP--------------------->
+class helpClass(discord.ui.View):
+  def __init__(self):
+    super().__init__(timeout=None)
 
+    bwebsite = discord.ui.Button(label='Website', style=discord.ButtonStyle.gray, url='https://www.zennara.me', emoji="<:zennara:931725235676397650>")
+    self.add_item(bwebsite)
+    bdiscord = discord.ui.Button(label='Discord', style=discord.ButtonStyle.gray, url='https://www.discord.gg/KUmkWVpBtR', emoji="<:bot:929180626706374656>")
+    self.add_item(bdiscord)
+    bdonate = discord.ui.Button(label='Donate', style=discord.ButtonStyle.gray, url='https://www.paypal.me/keaganlandfried', emoji="💟")
+    self.add_item(bdonate)
+
+  @discord.ui.select(custom_id="select-2", placeholder='View help with a specific section of commands', min_values=1, max_values=1, options=[
+    discord.SelectOption(label='General', value="General", description='View this for general ands server commands', emoji="❓")
+  ])
+  async def select_callback(self, select, interaction):
+    if select.values[0] == "General":
+      text = """
+      This bot uses **slash commands**. This mean all bot commands starts with `/`.
+      You can find more help in my [Discord server](https://discord.gg/KUmkWVpBtR).
+    
+      **Commands**
+      `/help` - Show the preview help page
+      `/ping` - Ping the bot for it's uptime
+
+      """
+      if staff(interaction):
+        text += """
+        **Mod Commands**
+        `/clear` - Clears the guilds database
+        """
+    embed = discord.Embed(color=0x00FF00,description=text, title=select.values[0])
+    embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+@bot.slash_command(description="Use me for help!",guild_ids=guild_ids, hidden=True)
+async def help(ctx):
+  helpText = """
+  **Slash Commands**
+  This bot uses **slash commands**. This mean all bot commands starts with `/`.
+  You can find more help in my [Discord server](https://discord.gg/YHHvT5vWnV).
+  
+  """
+  if staff(ctx):
+    helpText += """
+    **Staff Setup**
+    Some general things to know as a server mod. Ensure to set up the staff role with `/staff`. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
+    """
+  embed = discord.Embed(color=0x00FF00,description=helpText)
+  embed.set_footer(text="_______________________\nMade By Zennara#8377\nSelect an module for extensive help", icon_url=ctx.guild.get_member(bot.user.id).display_avatar.url)
+  #reply message
+  await ctx.respond(embed=embed, view=helpClass())
 #<-----------------------COMMANDS----------------------->
+@bot.slash_command(description="Clear the database",guild_ids=guild_ids)
+async def clear(ctx):
+  if staff(ctx):
+    for key in db:
+      del key
+    resetDB(ctx.guild)
+    await confirm(ctx, "Guild database cleared", True)
+  else:
+    await error(ctx, "You do not have the proper permissions to do this")
+
+@bot.slash_command(description="Reset the database",guild_ids=guild_ids, default_permissions=False)
+@permissions.is_user(427968672980533269)
+async def reset(ctx):
+  for guild in bot.guilds:
+    resetDB(guild)
+  await confirm(ctx, "Database was reset", True)
+    
 @bot.slash_command(description="Show the bot's uptime",guild_ids=guild_ids)
 async def ping(ctx):
   embed = discord.Embed(color=0x00FF00, title="**Pong!**", description=f"{bot.user.name} has been online for {datetime.now()-onlineTime}!")
@@ -69,7 +137,7 @@ async def on_message(message):
 #<-----------------------FUNCTIONS----------------------->
 #used to reset the database for a guild
 def resetDB(guild):
-  db[str(guild.id)] = {} #this is where you set up your db format
+  db[str(guild.id)] = {"mod":0} #this is where you set up your db format
 
 #check if a guild is in the db
 def checkGuild(guild):
@@ -86,6 +154,28 @@ async def error(ctx, code):
 async def confirm(ctx, code, eph): 
   embed = discord.Embed(color=0x00FF00, description= f"✅ {code}")
   await ctx.respond(embed=embed, ephemeral=eph)
+
+def staff(ctx):
+  checkGuild(ctx.guild)
+  mod = db[str(ctx.guild.id)]["mod"]
+  if hasattr(ctx, "author"):
+    print("test")
+    print(ctx.author.id)
+    print(ctx.author.guild.owner.id)
+    if ctx.author == ctx.author.guild.owner:
+        return True
+    if mod != 0:
+      if ctx.guild.get_role(mod) <= ctx.author.top_role:
+        return True
+    print("test3")
+  else:
+    print("test2")
+    if ctx.user.id == ctx.guild.owner.id:
+      return True
+    if mod != 0:
+      if ctx.guild.get_role(mod) <= ctx.guild.get_member(ctx.user.id).top_role:
+        return True
+  return False
 
 #bot
 keep_alive.keep_alive()  #keep the bot alive
