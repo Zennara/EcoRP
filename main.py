@@ -109,7 +109,18 @@ async def setJob(ctx, user:Option(discord.Member, "The member to give the job", 
   if job not in db[str(ctx.guild.id)]["jobs"]:
     db[str(ctx.guild.id)]["jobs"][job] = [job,"No Description Provided",0.0]
     info = "Job automatically created. Use `/edit job` to edit the job's description and salary.\n"
-  await confirm(ctx, f"{info} {user.mention} was given the job **{job}**", True)
+  checkUser(user)
+  oldJob = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
+  if db[str(ctx.guild.id)]["users"][str(user.id)]["job"] != "none":
+    addition = f"'s job was switched from **{oldJob}** to **{job}**"
+  else:
+    addition = f" was given the job **{job}**"
+  db[str(ctx.guild.id)]["users"][str(user.id)]["job"] = job
+  await confirm(ctx, f"{info}{user.mention} {addition}", True)
+
+@set.command(name="income", description="Sets a user's income",guild_ids=guild_ids)
+async def setIncome(ctx, user:Option(discord.Member, "The member to give the income", required=True), job:Option(float, "The hourly income.", required=True)):
+  pass
   
 
 bot.add_application_command(set)
@@ -159,6 +170,11 @@ def checkGuild(guild):
   if guild != None:
     if str(guild.id) not in db:
       resetDB(guild)
+
+def checkUser(user):
+  checkGuild(user.guild)
+  if str(user.id) not in db[str(user.guild.id)]["users"]:
+    db[str(user.guild.id)]["users"][str(user.id)] = {"job":"none"}
 
 #simple error message, passes ctx from commands
 async def error(ctx, code):
