@@ -159,17 +159,12 @@ def staff(ctx):
   checkGuild(ctx.guild)
   mod = db[str(ctx.guild.id)]["mod"]
   if hasattr(ctx, "author"):
-    print("test")
-    print(ctx.author.id)
-    print(ctx.author.guild.owner.id)
     if ctx.author == ctx.author.guild.owner:
         return True
     if mod != 0:
       if ctx.guild.get_role(mod) <= ctx.author.top_role:
         return True
-    print("test3")
   else:
-    print("test2")
     if ctx.user.id == ctx.guild.owner.id:
       return True
     if mod != 0:
