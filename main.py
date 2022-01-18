@@ -121,28 +121,34 @@ async def job(ctx, user:Option(discord.Member, "The member to view their job", r
 
 @bot.slash_command(description="Sets a user's job",guild_ids=guild_ids)
 async def hire(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
-  info = ""
-  if job not in db[str(ctx.guild.id)]["jobs"]:
-    db[str(ctx.guild.id)]["jobs"][job] = ["No Description Provided",0.0]
-    info = "Job automatically created. Use `/edit job` to edit the job's description and salary.\n"
-  checkUser(user)
-  oldJob = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
-  if db[str(ctx.guild.id)]["users"][str(user.id)]["job"] != "none":
-    addition = f"'s job was switched from **{oldJob}** to **{job}**"
+  if staff(ctx):
+    info = ""
+    if job not in db[str(ctx.guild.id)]["jobs"]:
+      db[str(ctx.guild.id)]["jobs"][job] = ["No Description Provided",0.0]
+      info = "Job automatically created. Use `/edit job` to edit the job's description and salary.\n"
+    checkUser(user)
+    oldJob = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
+    if db[str(ctx.guild.id)]["users"][str(user.id)]["job"] != "none":
+      addition = f"'s job was switched from **{oldJob}** to **{job}**"
+    else:
+      addition = f" was given the job **{job}**"
+    db[str(ctx.guild.id)]["users"][str(user.id)]["job"] = job
+    await confirm(ctx, f"{info}{user.mention} {addition}", True)
   else:
-    addition = f" was given the job **{job}**"
-  db[str(ctx.guild.id)]["users"][str(user.id)]["job"] = job
-  await confirm(ctx, f"{info}{user.mention} {addition}", True)
+    await error(ctx, "You do not have valid permissions")
 
 @bot.slash_command(description="Create a new job",guild_ids=guild_ids)
 async def createjob(ctx, title:Option(str, "The title of the job", required=True), salary:Option(float, "The salary for this job per hour", required=True), description:Option(str, "The description of this job", required=False, default=None)):
-  if description == None:
-    description = "No Description Provided"
-  if title not in db[str(ctx.guild.id)]["jobs"]:
-    db[str(ctx.guild.id)]["jobs"][title] = [description,salary]
-    await confirm(ctx, f"The job, `{title}`, was created. Assign users to it with `/hire`", True)
+  if staff(ctx):
+    if description == None:
+      description = "No Description Provided"
+    if title not in db[str(ctx.guild.id)]["jobs"]:
+      db[str(ctx.guild.id)]["jobs"][title] = [description,salary]
+      await confirm(ctx, f"The job, `{title}`, was created. Assign users to it with `/hire`", True)
+    else:
+      await error(ctx, f"This job already exists.")
   else:
-    await error(ctx, f"This job already exists.")
+    await error(ctx, "You do not have valid permissions")
 
 @bot.slash_command(description="View all the active jobs in the server",guild_ids=guild_ids)
 async def positions(ctx):
@@ -161,6 +167,16 @@ async def positions(ctx):
     await ctx.respond(embed=embed)
   else:
     await error(ctx, "This guild has no jobs at this time")
+
+@bot.slash_command(description="View your current balance", guild_ids=guild_ids)
+async def balance(ctx, user:Option(discord.Member, "The user to view their balance", required=False, default=None)):
+  if user == None:
+    user = ctx.author
+  if str(user.id) in db[str(ctx.guild.id)]["users"]:
+    bal = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"]
+  else:
+    bal = 0
+  await confirm(ctx, f"{user.mention}'s balance is {bal} 💸", True)
   
   
 #<-----------------------EVENTS----------------------->
