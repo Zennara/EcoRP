@@ -15,7 +15,7 @@ import math #for math
 intents = discord.Intents.default()
 bot = discord.Bot(intents=intents)
 
-guild_ids = [] #enter your guild ID's here for instant use instead of waiting for global slash registration
+guild_ids = [806706495466766366] #enter your guild ID's here for instant use instead of waiting for global slash registration
 
 #api limit checker | use 'kill 1' in the shell if you get limited
 r = requests.head(url="https://discord.com/api/v1")
@@ -27,7 +27,7 @@ except:
 
 #<-----------------------COMMANDS----------------------->
 @bot.slash_command(description="Show the bot's uptime",guild_ids=guild_ids)
-async def ping(ctx, test:Option(bool, "test this is")):
+async def ping(ctx):
   embed = discord.Embed(color=0x00FF00, title="**Pong!**", description=f"{bot.user.name} has been online for {datetime.now()-onlineTime}!")
   await ctx.respond(embed=embed)
   
