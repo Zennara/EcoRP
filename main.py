@@ -119,10 +119,8 @@ async def job(ctx, user:Option(discord.Member, "The member to view their job", r
   embed.set_footer(text=f"{salary}💸 / hour")
   await ctx.respond(embed=embed)
 
-set = SlashCommandGroup("set", "Set user's jobs and incomes", guild_ids=guild_ids)
-
-@set.command(name="job", description="Sets a user's job",guild_ids=guild_ids)
-async def setJob(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
+@bot.slash_commnd(description="Sets a user's job",guild_ids=guild_ids)
+async def hire(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
   info = ""
   if job not in db[str(ctx.guild.id)]["jobs"]:
     db[str(ctx.guild.id)]["jobs"][job] = ["No Description Provided",0.0]
@@ -135,13 +133,7 @@ async def setJob(ctx, user:Option(discord.Member, "The member to give the job", 
     addition = f" was given the job **{job}**"
   db[str(ctx.guild.id)]["users"][str(user.id)]["job"] = job
   await confirm(ctx, f"{info}{user.mention} {addition}", True)
-
-@set.command(name="income", description="Sets a user's income",guild_ids=guild_ids)
-async def setIncome(ctx, user:Option(discord.Member, "The member to give the income", required=True), job:Option(float, "The hourly income.", required=True)):
-  pass
   
-
-bot.add_application_command(set)
   
 #<-----------------------EVENTS----------------------->
 @bot.event
