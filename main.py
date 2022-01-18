@@ -143,6 +143,24 @@ async def createjob(ctx, title:Option(str, "The title of the job", required=True
     await confirm(ctx, f"The job, `{title}`, was created. Assign users to it with `/hire`", True)
   else:
     await error(ctx, f"This job already exists.")
+
+@bot.slash_command(description="View all the active jobs in the server",guild_ids=guild_ids)
+async def positions(ctx):
+  await ctx.defer()
+  desc = ""
+  if db[str(ctx.guild.id)]["jobs"]:
+    for job in db[str(ctx.guild.id)]["jobs"]:
+      count = 0
+      for worker in db[str(ctx.guild.id)]["users"]:
+        if  db[str(ctx.guild.id)]["users"][worker]["job"] == job:
+          count += 1
+      pay = db[str(ctx.guild.id)]["jobs"][job][1]
+      desc += f"**{job}** | **{count}** employees | **{pay}** 💸 / hour\n"
+    embed = discord.Embed(description=desc)
+    embed.set_author(name=f"{ctx.guild.name}'s Jobs", icon_url=ctx.guild.icon.url)
+    await ctx.respond(embed=embed)
+  else:
+    await error(ctx, "This guild has no jobs at this time")
   
   
 #<-----------------------EVENTS----------------------->
