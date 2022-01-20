@@ -192,6 +192,20 @@ async def inflate(ctx, amount:Option(float, "The amount of money to print", requ
   else:
     await error(ctx, "You can not print negative money")
 
+@bot.slash_command(description="Remove money from a user", guild_ids=guild_ids)
+async def tax(ctx, amount:Option(float, "The amount of money to tax", required=True), user:Option(discord.Member, "The member you wish to tax", required=False, default=None)):
+  if user == None:
+    user = ctx.author
+  if amount > 0:
+    checkUser(user)
+    db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] - amount
+    embed = discord.Embed(description=f"taxed **{amount}** 💸 from", color=0x00FF00)
+    embed.set_author(name=f"{ctx.guild.name}", icon_url=bot.user.display_avatar.url)
+    embed.set_footer(text=f"{user.display_name}", icon_url=user.display_avatar.url)
+    await ctx.respond(embed=embed)
+  else:
+    await error(ctx, "You can not tax negative money")
+
 @bot.slash_command(description="Give money to another user", guild_ids=guild_ids)
 async def pay(ctx, user:Option(discord.Member, "The member you wish to pay", required=True), amount:Option(float, "The amount of money to give", required=True)):
   if user != ctx.author:
