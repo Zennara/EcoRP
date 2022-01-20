@@ -70,7 +70,7 @@ async def help(ctx):
   if staff(ctx):
     helpText += """
     **Staff Setup**
-    Some general things to know as a server mod. Ensure to set up the staff role with `/staff`. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
+    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and tax to have the `Teller` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
     """
   embed = discord.Embed(color=0x00FF00,description=helpText)
   embed.set_footer(text="_______________________\nMade By Zennara#8377\nSelect an module for extensive help", icon_url=ctx.guild.get_member(bot.user.id).display_avatar.url)
@@ -167,6 +167,7 @@ async def positions(ctx):
     await ctx.respond(embed=embed)
   else:
     await error(ctx, "This guild has no jobs at this time")
+
 
 @bot.slash_command(description="View your current balance", guild_ids=guild_ids)
 async def balance(ctx, user:Option(discord.Member, "The user to view their balance", required=False, default=None)):
