@@ -24,6 +24,15 @@ try:
 except:
   print("No rate limit")
 
+async def payUsers():
+  while True:
+    await asyncio.sleep(3600)
+    for guild in bot.guilds:
+      if not db[str(guild.id)]["bankrupt"]:
+        for userID in db[str(guild.id)]["users"]:
+          if db[str(guild.id)]["users"][userID]["job"] != "none":
+           db[str(guild.id)]["users"][userID]["bal"] += db[str(guild.id)]["jobs"][db[str(guild.id)]["users"][userID]["job"]][1]
+
 #<-----------------------HELP--------------------->
 class helpClass(discord.ui.View):
   def __init__(self):
@@ -332,6 +341,9 @@ def staff(ctx):
         return True
   return False
 
+#create task loops
+bot.loop.create_task(payUsers())
+  
 #bot
 keep_alive.keep_alive()  #keep the bot alive
 bot.run(os.environ.get("TOKEN"))  #secret variable named 'TOKEN'
