@@ -177,6 +177,32 @@ async def balance(ctx, user:Option(discord.Member, "The user to view their balan
   else:
     bal = 0
   await confirm(ctx, f"{user.mention}'s balance is {bal} 💸", True)
+
+@bot.slash_command(description="Give money to another user", guild_ids=guild_ids)
+async def inflate(ctx, amount:Option(float, "The amount of money to print", required=True), user:Option(discord.Member, "The member you wish to inflate", required=False, default=None)):
+
+@bot.slash_command(description="Give money to another user", guild_ids=guild_ids)
+async def pay(ctx, user:Option(discord.Member, "The member you wish to pay", required=True), amount:Option(float, "The amount of money to give", required=True)):
+  if user != ctx.author:
+    if str(ctx.author.id) in db[str(ctx.guild.id)]["users"]:
+      authorBal = db[str(ctx.guild.id)]["users"][str(ctx.author.id)]["bal"]
+      if amount > 0:
+        if authorBal >= amount:
+          checkUser(user)
+          db[str(ctx.guild.id)]["users"][str(ctx.author.id)]["bal"] = authorBal - amount
+          db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] + amount
+          embed = discord.Embed(description=f"gave **{amount}** 💸 to", color=0x00FF00)
+          embed.set_author(name=f"{ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
+          embed.set_footer(text=f"{user.display_name}", icon_url=user.display_avatar.url)
+          await ctx.respond(embed=embed)
+        else:
+          await error(ctx, "You do not have enough money")
+      else:
+        await error(ctx, "You can not give an amount less than 0")
+    else:
+      await error("You do not have any money to give")
+  else:
+    await error(ctx, "You can not pay yourself")
   
   
 #<-----------------------EVENTS----------------------->
