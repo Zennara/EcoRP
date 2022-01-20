@@ -62,7 +62,7 @@ class helpClass(discord.ui.View):
 @bot.slash_command(description="Use me for help!",guild_ids=guild_ids, hidden=True)
 async def help(ctx):
   helpText = """
-  **Slash Commands**
+  **Slash Commands**  
   This bot uses **slash commands**. This mean all bot commands starts with `/`.
   You can find more help in my [Discord server](https://discord.gg/YHHvT5vWnV).
   
