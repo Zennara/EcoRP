@@ -70,7 +70,7 @@ async def help(ctx):
   if staff(ctx):
     helpText += """
     **Staff Setup**
-    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and tax to have the `Teller` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
+    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and taxing by setting up the `/staff` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
     """
   embed = discord.Embed(color=0x00FF00,description=helpText)
   embed.set_footer(text="_______________________\nMade By Zennara#8377\nSelect an module for extensive help", icon_url=ctx.guild.get_member(bot.user.id).display_avatar.url)
@@ -121,7 +121,6 @@ async def job(ctx, user:Option(discord.Member, "The member to view their job", r
   await ctx.respond(embed=embed)
 
 @bot.slash_command(description="Sets a user's job",guild_ids=guild_ids)
-@permissions.has_role("Teller")
 async def hire(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
   if staff(ctx):
     info = ""
@@ -140,7 +139,6 @@ async def hire(ctx, user:Option(discord.Member, "The member to give the job", re
     await error(ctx, "You do not have valid permissions")
 
 @bot.slash_command(description="Create a new job",guild_ids=guild_ids)
-@permissions.has_role("Teller")
 async def createjob(ctx, title:Option(str, "The title of the job", required=True), salary:Option(float, "The salary for this job per hour", required=True), description:Option(str, "The description of this job", required=False, default=None)):
   if staff(ctx):
     if description == None:
@@ -182,34 +180,39 @@ async def balance(ctx, user:Option(discord.Member, "The user to view their balan
   await confirm(ctx, f"{user.mention}'s balance is {bal} 💸", True)
 
 @bot.slash_command(description="Inflate money of another user", guild_ids=guild_ids)
-@permissions.has_role("Teller")
 async def inflate(ctx, amount:Option(float, "The amount of money to print", required=True), user:Option(discord.Member, "The member you wish to inflate", required=False, default=None)):
-  if user == None:
-    user = ctx.author
-  if amount > 0:
-    checkUser(user)
-    db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] + amount
-    embed = discord.Embed(description=f"gave **{amount}** 💸 to", color=0x00FF00)
-    embed.set_author(name=f"{ctx.guild.name}", icon_url=bot.user.display_avatar.url)
-    embed.set_footer(text=f"{user.display_name}", icon_url=user.display_avatar.url)
-    await ctx.respond(embed=embed)
+  if staff(interaction):
+    if user == None:
+      user = ctx.author
+    if amount > 0:
+      checkUser(user)
+      db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] + amount
+      embed = discord.Embed(description=f"gave **{amount}** 💸 to", color=0x00FF00)
+      embed.set_author(name=f"{ctx.guild.name}", icon_url=bot.user.display_avatar.url)
+      embed.set_footer(text=f"{user.display_name}", icon_url=user.display_avatar.url)
+      await ctx.respond(embed=embed)
+    else:
+      await error(ctx, "You can not print negative money")
   else:
-    await error(ctx, "You can not print negative money")
+    await error(ctx, "You do not have the correct permissions")
 
 @bot.slash_command(description="Remove money from a user", guild_ids=guild_ids)
 @permissions.has_role("Teller")
 async def tax(ctx, amount:Option(float, "The amount of money to tax", required=True), user:Option(discord.Member, "The member you wish to tax", required=False, default=None)):
-  if user == None:
-    user = ctx.author
-  if amount > 0:
-    checkUser(user)
-    db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] - amount
-    embed = discord.Embed(description=f"taxed **{amount}** 💸 from", color=0x00FF00)
-    embed.set_author(name=f"{ctx.guild.name}", icon_url=bot.user.display_avatar.url)
-    embed.set_footer(text=f"{user.display_name}", icon_url=user.display_avatar.url)
-    await ctx.respond(embed=embed)
+  if staff(interaction):
+    if user == None:
+      user = ctx.author
+    if amount > 0:
+      checkUser(user)
+      db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] = db[str(ctx.guild.id)]["users"][str(user.id)]["bal"] - amount
+      embed = discord.Embed(description=f"taxed **{amount}** 💸 from", color=0x00FF00)
+      embed.set_author(name=f"{ctx.guild.name}", icon_url=bot.user.display_avatar.url)
+      embed.set_footer(text=f"{user.display_name}", icon_url=user.display_avatar.url)
+      await ctx.respond(embed=embed)
+    else:
+      await error(ctx, "You can not tax negative money")
   else:
-    await error(ctx, "You can not tax negative money")
+    await error(ctx, "You do not have the correct permissions")
 
 @bot.slash_command(description="Give money to another user", guild_ids=guild_ids)
 async def pay(ctx, user:Option(discord.Member, "The member you wish to pay", required=True), amount:Option(float, "The amount of money to give", required=True)):
