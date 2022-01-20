@@ -70,7 +70,7 @@ async def help(ctx):
   if staff(ctx):
     helpText += """
     **Staff Setup**
-    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and taxing by setting up the `/teller` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
+    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and taxing by setting up the `/teller` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all.
     """
   embed = discord.Embed(color=0x00FF00,description=helpText)
   embed.set_footer(text="_______________________\nMade By Zennara#8377\nSelect an module for extensive help", icon_url=ctx.guild.get_member(bot.user.id).display_avatar.url)
@@ -185,6 +185,17 @@ async def balance(ctx, user:Option(discord.Member, "The user to view their balan
     bal = 0
   await confirm(ctx, f"{user.mention}'s balance is {bal} 💸", True)
 
+@bot.slash_command(description="Stop the hourly payments", guild_ids=guild_ids)
+async def bankuptcy(ctx):
+  set = not db[str(ctx.guild.id)]["bankrupt"]
+  if set:
+    flag = "now bankrupt.\nHourly wages will **not** be paid"
+  else:
+    flag = "no longer bankrupt.\nHourly wages will **now** be paid"
+  db[str(ctx.guild.id)]["bankrupt"] = set
+  await confirm(ctx, f"The server is {flag}", False)
+  
+
 @bot.slash_command(description="Inflate money of another user", guild_ids=guild_ids)
 async def inflate(ctx, amount:Option(float, "The amount of money to print", required=True), user:Option(discord.Member, "The member you wish to inflate", required=False, default=None)):
   if staff(ctx):
@@ -281,7 +292,7 @@ async def on_message(message):
 #<-----------------------FUNCTIONS----------------------->
 #used to reset the database for a guild
 def resetDB(guild):
-  db[str(guild.id)] = {"mod":0, "channel":0, "jobs":{}, "users":{}} #this is where you set up your db format
+  db[str(guild.id)] = {"mod":0, "bankrupt":False, "jobs":{}, "users":{}} #this is where you set up your db format
 
 #check if a guild is in the db
 def checkGuild(guild):
