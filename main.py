@@ -203,7 +203,6 @@ async def inflate(ctx, amount:Option(float, "The amount of money to print", requ
     await error(ctx, "You do not have the correct permissions")
 
 @bot.slash_command(description="Remove money from a user", guild_ids=guild_ids)
-@permissions.has_role("Teller")
 async def tax(ctx, amount:Option(float, "The amount of money to tax", required=True), user:Option(discord.Member, "The member you wish to tax", required=False, default=None)):
   if staff(ctx):
     if user == None:
