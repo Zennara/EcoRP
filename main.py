@@ -70,7 +70,7 @@ async def help(ctx):
   if staff(ctx):
     helpText += """
     **Staff Setup**
-    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and taxing by setting up the `/staff` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
+    Some general things to know as a server mod. Ensure anyone you wish to have moderating permissions like printing money and taxing by setting up the `/teller` role. Anybody with this role or higher in the role heirarchy will be able to use server and bot managing commands. Only give this to trusted moderators or admins, if at all. If t
     """
   embed = discord.Embed(color=0x00FF00,description=helpText)
   embed.set_footer(text="_______________________\nMade By Zennara#8377\nSelect an module for extensive help", icon_url=ctx.guild.get_member(bot.user.id).display_avatar.url)
@@ -169,6 +169,12 @@ async def positions(ctx):
   else:
     await error(ctx, "This guild has no jobs at this time")
 
+@bot.slash_command(description="Change the lowest staff role", guild_ids=guild_ids)
+@permissions.is_owner()
+async def teller(ctx, role:Option(discord.Role, "The lowest role in the heirarchy for bank commands", required=True)):
+  db[str(ctx.guild.id)]["mod"] = int(role.id)
+  await confirm(ctx, f"The lowest role in the heirarchy for bank commands is now {role.mention}", True)
+
 @bot.slash_command(description="View your current balance", guild_ids=guild_ids)
 async def balance(ctx, user:Option(discord.Member, "The user to view their balance", required=False, default=None)):
   if user == None:
@@ -181,7 +187,7 @@ async def balance(ctx, user:Option(discord.Member, "The user to view their balan
 
 @bot.slash_command(description="Inflate money of another user", guild_ids=guild_ids)
 async def inflate(ctx, amount:Option(float, "The amount of money to print", required=True), user:Option(discord.Member, "The member you wish to inflate", required=False, default=None)):
-  if staff(interaction):
+  if staff(ctx):
     if user == None:
       user = ctx.author
     if amount > 0:
@@ -199,7 +205,7 @@ async def inflate(ctx, amount:Option(float, "The amount of money to print", requ
 @bot.slash_command(description="Remove money from a user", guild_ids=guild_ids)
 @permissions.has_role("Teller")
 async def tax(ctx, amount:Option(float, "The amount of money to tax", required=True), user:Option(discord.Member, "The member you wish to tax", required=False, default=None)):
-  if staff(interaction):
+  if staff(ctx):
     if user == None:
       user = ctx.author
     if amount > 0:
