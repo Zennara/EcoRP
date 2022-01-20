@@ -80,6 +80,7 @@ async def help(ctx):
   
 #<-----------------------COMMANDS----------------------->
 @bot.slash_command(description="Clear the database",guild_ids=guild_ids)
+@permissions.is_owner()
 async def clear(ctx):
   if staff(ctx):
     for key in db:
@@ -120,6 +121,7 @@ async def job(ctx, user:Option(discord.Member, "The member to view their job", r
   await ctx.respond(embed=embed)
 
 @bot.slash_command(description="Sets a user's job",guild_ids=guild_ids)
+@permissions.has_role("Teller")
 async def hire(ctx, user:Option(discord.Member, "The member to give the job", required=True), job:Option(str, "The name of the job. If it doesn't exist a job will be created for you.", required=True)):
   if staff(ctx):
     info = ""
@@ -138,6 +140,7 @@ async def hire(ctx, user:Option(discord.Member, "The member to give the job", re
     await error(ctx, "You do not have valid permissions")
 
 @bot.slash_command(description="Create a new job",guild_ids=guild_ids)
+@permissions.has_role("Teller")
 async def createjob(ctx, title:Option(str, "The title of the job", required=True), salary:Option(float, "The salary for this job per hour", required=True), description:Option(str, "The description of this job", required=False, default=None)):
   if staff(ctx):
     if description == None:
@@ -168,7 +171,6 @@ async def positions(ctx):
   else:
     await error(ctx, "This guild has no jobs at this time")
 
-
 @bot.slash_command(description="View your current balance", guild_ids=guild_ids)
 async def balance(ctx, user:Option(discord.Member, "The user to view their balance", required=False, default=None)):
   if user == None:
@@ -179,7 +181,8 @@ async def balance(ctx, user:Option(discord.Member, "The user to view their balan
     bal = 0
   await confirm(ctx, f"{user.mention}'s balance is {bal} 💸", True)
 
-@bot.slash_command(description="Give money to another user", guild_ids=guild_ids)
+@bot.slash_command(description="Inflate money of another user", guild_ids=guild_ids)
+@permissions.has_role("Teller")
 async def inflate(ctx, amount:Option(float, "The amount of money to print", required=True), user:Option(discord.Member, "The member you wish to inflate", required=False, default=None)):
   if user == None:
     user = ctx.author
@@ -194,6 +197,7 @@ async def inflate(ctx, amount:Option(float, "The amount of money to print", requ
     await error(ctx, "You can not print negative money")
 
 @bot.slash_command(description="Remove money from a user", guild_ids=guild_ids)
+@permissions.has_role("Teller")
 async def tax(ctx, amount:Option(float, "The amount of money to tax", required=True), user:Option(discord.Member, "The member you wish to tax", required=False, default=None)):
   if user == None:
     user = ctx.author
