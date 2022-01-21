@@ -46,7 +46,9 @@ class helpClass(discord.ui.View):
     self.add_item(bdonate)
 
   @discord.ui.select(custom_id="select-2", placeholder='View help with a specific section of commands', min_values=1, max_values=1, options=[
-    discord.SelectOption(label='General', value="General", description='View this for general ands server commands', emoji="❓")
+    discord.SelectOption(label='General', value="General", description='View this for general ands server commands', emoji="❓"),
+    discord.SelectOption(label='Jobs', value="Jobs", description='Commands related to jobs', emoji="🧑‍🏭"),
+    discord.SelectOption(label='Bank', value="Bank", description='Commands related to money', emoji="💸")
   ])
   async def select_callback(self, select, interaction):
     if select.values[0] == "General":
@@ -62,7 +64,41 @@ class helpClass(discord.ui.View):
       if staff(interaction):
         text += """
         **Mod Commands**
-        `/clear` - Clears the guilds database
+        `/clear` - Clears everyone's money and jobs (CANNOT BE UNDONE)
+        `/teller` - Add the lowest role in the server heirarchy to perform mod commands
+        """
+    elif select.values[0] == "Jobs":
+      text = """
+      These are the commands related to jobs. Salary for jobs is paid hourly.
+    
+      **Commands**
+      `/positions` - Show all the active jobs on the server
+      `/job` - Show your current job
+
+      """
+      if staff(interaction):
+        text += """
+        **Mod Commands**
+        `/hire` - Give someone a job
+        `/fire` - Remove someone's job
+        `/createjob` - Create a new job
+        `/deletejob` - Remove a job
+        """
+    elif select.values[0] == "Bank":
+      text = """
+      These are all the commands related to money, including bank commands.
+    
+      **Commands**
+      `/pay` - Give money to another user
+      `/balance` - View your current balance
+
+      """
+      if staff(interaction):
+        text += """
+        **Mod Commands**
+        `/bankruptcy` - Stop the hourly payments
+        `/inflate` - Add money from a user
+        `/tax` - Remove money from a user
         """
     embed = discord.Embed(color=0x00FF00,description=text, title=select.values[0])
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
