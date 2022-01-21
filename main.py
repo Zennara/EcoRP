@@ -154,8 +154,13 @@ async def job(ctx, user:Option(discord.Member, "The member to view their job", r
   if str(user.id) in db[str(ctx.guild.id)]["users"]:
     u = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
     jobTitle = u
-    jobDesc = db[str(ctx.guild.id)]["jobs"][u][0]
-    salary = db[str(ctx.guild.id)]["jobs"][u][1]
+    if jobTitle != "none":
+      jobDesc = db[str(ctx.guild.id)]["jobs"][u][0]
+      salary = db[str(ctx.guild.id)]["jobs"][u][1]
+    else:
+      jobTitle = "No Current Job"
+      jobDesc = "No Job Description"
+      salary = "0"
   else:
     jobTitle = "No Current Job"
     jobDesc = "No Job Description"
@@ -208,6 +213,21 @@ async def createjob(ctx, title:Option(str, "The title of the job", required=True
       await confirm(ctx, f"The job, `{title}`, was created. Assign users to it with `/hire`", True)
     else:
       await error(ctx, f"This job already exists.")
+  else:
+    await error(ctx, "You do not have valid permissions")
+
+@bot.slash_command(description="Create a new job",guild_ids=guild_ids)
+async def deletejob(ctx, title:Option(str, "The title of the job", required=True)):
+  checkGuild(ctx.guild)
+  if staff(ctx):
+    if title in db[str(ctx.guild.id)]["jobs"]:
+      del db[str(ctx.guild.id)]["jobs"][title]
+      for user in db[str(ctx.guild.id)]["users"]:
+        if db[str(ctx.guild.id)]["users"][user]["job"] == title:
+          db[str(ctx.guild.id)]["users"][user]["job"] = "none"
+      await confirm(ctx, f"The job, `{title}`, was deleted. All users with this job were fired.", True)
+    else:
+      await error(ctx, f"This job does not exist")
   else:
     await error(ctx, "You do not have valid permissions")
 
