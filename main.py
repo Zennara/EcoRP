@@ -179,7 +179,22 @@ async def hire(ctx, user:Option(discord.Member, "The member to give the job", re
     else:
       addition = f" was given the job **{job}**"
     db[str(ctx.guild.id)]["users"][str(user.id)]["job"] = job
-    await confirm(ctx, f"{info}{user.mention} {addition}", True)
+    await confirm(ctx, f"{info}{user.mention} {addition}", False)
+  else:
+    await error(ctx, "You do not have valid permissions")
+
+@bot.slash_command(description="Remove a user's job",guild_ids=guild_ids)
+async def fire(ctx, user:Option(discord.Member, "The member to remove from their job", required=True)):
+  if staff(ctx):
+    if str(user.id) in db[str(ctx.guild.id)]["users"]:
+      job = db[str(ctx.guild.id)]["users"][str(user.id)]["job"]
+      if job != "none":
+        db[str(ctx.guild.id)]["users"][str(user.id)]["job"] = "none"
+        await confirm(ctx, f"{user.mention} was fired from their job, **{job}**", False)
+      else:
+        await error(ctx, "User is unemployed")
+    else:
+      await error(ctx, "User is unemployed")
   else:
     await error(ctx, "You do not have valid permissions")
 
